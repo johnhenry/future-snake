@@ -35,6 +35,9 @@ const {
   checkCollision,
   teleport,
   shapeshift,
+  AIAdversary,
+  createAdversaries,
+  moveAdversaries,
 } = window;
 
 // Tests
@@ -97,6 +100,55 @@ function runTests() {
     "Shapeshift should remove one segment"
   );
   assert(energy < 100, "Shapeshift should consume energy");
+
+  // Test AI Adversary initialization
+  const adversary = new AIAdversary(100, 100, "medium");
+  assert(
+    adversary.x === 100,
+    "Adversary X position should be initialized correctly"
+  );
+  assert(
+    adversary.y === 100,
+    "Adversary Y position should be initialized correctly"
+  );
+  assert(
+    adversary.difficulty === "medium",
+    "Adversary difficulty should be set correctly"
+  );
+  assert(adversary.direction, "Adversary should have an initial direction");
+  assert(adversary.color, "Adversary should have a color based on difficulty");
+
+  // Test createAdversaries
+  createAdversaries();
+  assert(adversaries.length === 3, "Should create 3 adversaries");
+  assert(
+    adversaries[0].difficulty === "easy",
+    "First adversary should be easy"
+  );
+  assert(
+    adversaries[1].difficulty === "medium",
+    "Second adversary should be medium"
+  );
+  assert(
+    adversaries[2].difficulty === "hard",
+    "Third adversary should be hard"
+  );
+
+  // Test moveAdversaries
+  const initialPositions = adversaries.map((a) => ({ x: a.x, y: a.y }));
+  moveAdversaries();
+  for (let i = 0; i < adversaries.length; i++) {
+    assert(
+      adversaries[i].x !== initialPositions[i].x ||
+        adversaries[i].y !== initialPositions[i].y,
+      `Adversary ${i} should move`
+    );
+  }
+
+  // Test collision with adversary
+  snake = [{ x: 0, y: 0 }];
+  adversaries = [new AIAdversary(0, 0, "easy")];
+  assert(checkCollision(), "Should detect collision with adversary");
 
   console.log("All tests passed!");
 }
