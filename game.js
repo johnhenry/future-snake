@@ -17,19 +17,24 @@ let direction = "right";
 let gameLoop;
 let score = 0;
 let energy = 100;
+let gravityWells = [];
 
 const gridSize = 20;
 const teleportCost = 20;
 const shapeshiftCost = 15;
+const maxGravityWells = 3;
+const gravityWellStrength = 0.5;
 
 function initGame() {
   snake = [{ x: 0, y: 0 }];
   direction = "right";
   score = 0;
   energy = 100;
+  gravityWells = [];
   updateScore();
   updateEnergy();
   createFood();
+  createGravityWells();
 }
 
 function createFood() {
@@ -37,6 +42,16 @@ function createFood() {
     x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
     y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize,
   };
+}
+
+function createGravityWells() {
+  for (let i = 0; i < maxGravityWells; i++) {
+    gravityWells.push({
+      x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+      y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize,
+      type: Math.random() < 0.5 ? "attractive" : "repulsive",
+    });
+  }
 }
 
 function drawSnake() {
@@ -68,6 +83,24 @@ function drawFood() {
   ctx.shadowBlur = 0;
 }
 
+function drawGravityWells() {
+  gravityWells.forEach((well) => {
+    ctx.fillStyle =
+      well.type === "attractive"
+        ? "rgba(255, 0, 0, 0.5)"
+        : "rgba(0, 255, 0, 0.5)";
+    ctx.beginPath();
+    ctx.arc(
+      well.x + gridSize / 2,
+      well.y + gridSize / 2,
+      gridSize,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+  });
+}
+
 function moveSnake() {
   const head = Object.assign({}, snake[0]);
 
@@ -86,6 +119,8 @@ function moveSnake() {
       break;
   }
 
+  applyGravityWellsEffect(head);
+
   if (head.x < 0) head.x = canvas.width - gridSize;
   if (head.x >= canvas.width) head.x = 0;
   if (head.y < 0) head.y = canvas.height - gridSize;
@@ -102,6 +137,28 @@ function moveSnake() {
   } else {
     snake.pop();
   }
+}
+
+function applyGravityWellsEffect(head) {
+  gravityWells.forEach((well) => {
+    const dx = well.x - head.x;
+    const dy = well.y - head.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < gridSize * 3) {
+      const force =
+        (gravityWellStrength * (gridSize * 3 - distance)) / (gridSize * 3);
+      const angle = Math.atan2(dy, dx);
+
+      if (well.type === "attractive") {
+        head.x += Math.cos(angle) * force * gridSize;
+        head.y += Math.sin(angle) * force * gridSize;
+      } else {
+        head.x -= Math.cos(angle) * force * gridSize;
+        head.y -= Math.sin(angle) * force * gridSize;
+      }
+    }
+  });
 }
 
 function checkCollision() {
@@ -164,6 +221,7 @@ function update() {
   }
   drawSnake();
   drawFood();
+  drawGravityWells();
   energy = Math.max(energy - 0.1, 0);
   updateEnergy();
   if (energy === 0) {
@@ -217,3 +275,4 @@ closeInstructionsButton.addEventListener("click", () => {
 initGame();
 drawSnake();
 drawFood();
+drawGravityWells();

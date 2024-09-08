@@ -9,12 +9,35 @@ Future Snake is a modern take on the classic Snake game. This project aims to cr
 - `game.js`: The main JavaScript file that implements the game logic.
 - `test.js`: Contains tests for the game's functionality.
 
+## Features
+
+### Core Gameplay
+
+- Classic snake movement and growth mechanics
+- Teleportation ability
+- Shapeshifting ability
+
+### Gravity Wells
+
+The game now includes gravity wells that affect the snake's movement:
+
+- Attractive wells (red): Pull the snake towards them
+- Repulsive wells (green): Push the snake away from them
+
+Gravity wells add an extra layer of challenge and strategy to the game.
+
 ## Getting Started
 
 To run the game locally:
 
 1. Clone this repository to your local machine.
 2. Open `index.html` in your web browser.
+
+## Controls
+
+- Arrow keys: Move the snake
+- T: Teleport
+- S: Shapeshift
 
 ## Development
 
