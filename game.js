@@ -21,12 +21,20 @@ let energy = 100;
 const gridSize = 20;
 const teleportCost = 20;
 const shapeshiftCost = 15;
+const timeManipulationCost = 25;
+
+let timeManipulation = {
+  active: false,
+  type: null,
+  duration: 0,
+};
 
 function initGame() {
   snake = [{ x: 0, y: 0 }];
   direction = "right";
   score = 0;
   energy = 100;
+  timeManipulation = { active: false, type: null, duration: 0 };
   updateScore();
   updateEnergy();
   createFood();
@@ -155,6 +163,55 @@ function shapeshift() {
   }
 }
 
+function activateTimeManipulation(type) {
+  if (energy >= timeManipulationCost && !timeManipulation.active) {
+    timeManipulation = {
+      active: true,
+      type: type,
+      duration: 100,
+    };
+    energy -= timeManipulationCost;
+    updateEnergy();
+  }
+}
+
+function applyTimeManipulation() {
+  if (timeManipulation.active) {
+    timeManipulation.duration--;
+    if (timeManipulation.duration <= 0) {
+      timeManipulation = { active: false, type: null, duration: 0 };
+    }
+
+    switch (timeManipulation.type) {
+      case "slow":
+        return 200;
+      case "fast":
+        return 50;
+      case "reverse":
+        snake.reverse();
+        return 100;
+    }
+  }
+  return 100;
+}
+
+function drawTimeManipulationEffect() {
+  if (timeManipulation.active) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.font = "20px Arial";
+    ctx.fillText(
+      `Time ${
+        timeManipulation.type.charAt(0).toUpperCase() +
+        timeManipulation.type.slice(1)
+      }`,
+      10,
+      30
+    );
+  }
+}
+
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   moveSnake();
@@ -164,6 +221,7 @@ function update() {
   }
   drawSnake();
   drawFood();
+  drawTimeManipulationEffect();
   energy = Math.max(energy - 0.1, 0);
   updateEnergy();
   if (energy === 0) {
@@ -191,10 +249,19 @@ document.addEventListener("keydown", (e) => {
     case "s":
       shapeshift();
       break;
+    case "1":
+      activateTimeManipulation("slow");
+      break;
+    case "2":
+      activateTimeManipulation("fast");
+      break;
+    case "3":
+      activateTimeManipulation("reverse");
+      break;
     case " ":
       if (!gameLoop) {
         initGame();
-        gameLoop = setInterval(update, 100);
+        gameLoop = setInterval(update, applyTimeManipulation());
       }
       break;
   }
@@ -203,7 +270,7 @@ document.addEventListener("keydown", (e) => {
 startButton.addEventListener("click", () => {
   menu.style.display = "none";
   initGame();
-  gameLoop = setInterval(update, 100);
+  gameLoop = setInterval(update, applyTimeManipulation());
 });
 
 instructionsButton.addEventListener("click", () => {
