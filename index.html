@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Futuristic Snake: Project Ouroboros</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="game-board"></canvas>
+      <div id="hud">
+        <div id="score">Score: <span id="score-value">0</span></div>
+        <div id="energy">Energy: <span id="energy-value">100</span></div>
+      </div>
+    </div>
+    <div id="menu">
+      <h1>Project Ouroboros</h1>
+      <button id="start-button">Start Game</button>
+      <button id="instructions-button">Instructions</button>
+    </div>
+    <div id="instructions" class="hidden">
+      <h2>Instructions</h2>
+      <p>
+        Navigate the digital realm as a sentient snake AI. Consume quantum data
+        fragments to grow and uncover the secrets of this virtual world.
+      </p>
+      <ul>
+        <li>Use arrow keys to move</li>
+        <li>Press 'T' to teleport (costs energy)</li>
+        <li>Press 'S' to shapeshift (costs energy)</li>
+        <li>Avoid collisions with walls and yourself</li>
+        <li>Beware of holographic obstacles and AI adversaries</li>
+      </ul>
+      <button id="close-instructions">Close</button>
+    </div>
+    <script src="game.js"></script>
+  </body>
+</html>
