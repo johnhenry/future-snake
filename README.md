@@ -26,6 +26,16 @@ The game now includes gravity wells that affect the snake's movement:
 
 Gravity wells add an extra layer of challenge and strategy to the game.
 
+### Time Manipulation
+
+The game now includes time manipulation abilities:
+
+- Slow down time: Press '1' to activate
+- Speed up time: Press '2' to activate
+- Reverse time: Press '3' to activate
+
+These abilities cost energy to use and have a limited duration.
+
 ## Getting Started
 
 To run the game locally:
@@ -38,6 +48,9 @@ To run the game locally:
 - Arrow keys: Move the snake
 - T: Teleport
 - S: Shapeshift
+- 1: Slow down time
+- 2: Speed up time
+- 3: Reverse time
 
 ## Development
 
