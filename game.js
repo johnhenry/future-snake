@@ -21,12 +21,20 @@ let energy = 100;
 const gridSize = 20;
 const teleportCost = 20;
 const shapeshiftCost = 15;
+const timeManipulationCost = 25;
+
+let timeManipulation = {
+  active: false,
+  type: null,
+  duration: 0,
+};
 
 function initGame() {
   snake = [{ x: 0, y: 0 }];
   direction = "right";
   score = 0;
   energy = 100;
+  timeManipulation = { active: false, type: null, duration: 0 };
   updateScore();
   updateEnergy();
   createFood();
@@ -155,6 +163,90 @@ function shapeshift() {
   }
 }
 
+function activateTimeManipulation(type) {
+  if (energy >= timeManipulationCost && !timeManipulation.active) {
+    timeManipulation = {
+      active: true,
+      type: type,
+      duration: 100,
+    };
+    energy -= timeManipulationCost;
+    updateEnergy();
+    if (type === "reverse") reverseSnake();
+  }
+}
+
+// Turn the snake around once: the tail becomes the head and it heads away
+// from its old body.
+function reverseSnake() {
+  snake.reverse();
+  if (snake.length < 2) {
+    direction = { up: "down", down: "up", left: "right", right: "left" }[direction];
+    return;
+  }
+  const [head, neck] = snake;
+  // A gap wider than one cell means the pair straddles a wrapped edge.
+  let dx = head.x - neck.x;
+  let dy = head.y - neck.y;
+  if (Math.abs(dx) > gridSize) dx = -dx;
+  if (Math.abs(dy) > gridSize) dy = -dy;
+  if (dx > 0) direction = "right";
+  else if (dx < 0) direction = "left";
+  else if (dy > 0) direction = "down";
+  else direction = "up";
+}
+
+let tickMs = 100;
+
+function startLoop() {
+  tickMs = applyTimeManipulation();
+  gameLoop = setInterval(update, tickMs);
+}
+
+// Called once per tick: re-arm the interval when the time effect changes speed.
+function rescheduleLoop() {
+  const ms = applyTimeManipulation();
+  if (ms !== tickMs) {
+    clearInterval(gameLoop);
+    tickMs = ms;
+    gameLoop = setInterval(update, tickMs);
+  }
+}
+
+function applyTimeManipulation() {
+  if (timeManipulation.active) {
+    timeManipulation.duration--;
+    if (timeManipulation.duration <= 0) {
+      timeManipulation = { active: false, type: null, duration: 0 };
+    }
+
+    switch (timeManipulation.type) {
+      case "slow":
+        return 200;
+      case "fast":
+        return 50;
+    }
+  }
+  return 100;
+}
+
+function drawTimeManipulationEffect() {
+  if (timeManipulation.active) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.font = "20px Arial";
+    ctx.fillText(
+      `Time ${
+        timeManipulation.type.charAt(0).toUpperCase() +
+        timeManipulation.type.slice(1)
+      }`,
+      10,
+      30
+    );
+  }
+}
+
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   moveSnake();
@@ -164,11 +256,14 @@ function update() {
   }
   drawSnake();
   drawFood();
+  drawTimeManipulationEffect();
   energy = Math.max(energy - 0.1, 0);
   updateEnergy();
   if (energy === 0) {
     gameOver();
+    return;
   }
+  rescheduleLoop();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -191,10 +286,19 @@ document.addEventListener("keydown", (e) => {
     case "s":
       shapeshift();
       break;
+    case "1":
+      activateTimeManipulation("slow");
+      break;
+    case "2":
+      activateTimeManipulation("fast");
+      break;
+    case "3":
+      activateTimeManipulation("reverse");
+      break;
     case " ":
       if (!gameLoop) {
         initGame();
-        gameLoop = setInterval(update, 100);
+        startLoop();
       }
       break;
   }
@@ -203,7 +307,7 @@ document.addEventListener("keydown", (e) => {
 startButton.addEventListener("click", () => {
   menu.style.display = "none";
   initGame();
-  gameLoop = setInterval(update, 100);
+  startLoop();
 });
 
 instructionsButton.addEventListener("click", () => {
