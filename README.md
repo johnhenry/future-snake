@@ -17,6 +17,15 @@ Future Snake is a modern take on the classic Snake game. This project aims to cr
 - Teleportation ability
 - Shapeshifting ability
 
+### Gravity Wells
+
+The game now includes gravity wells that affect the snake's movement:
+
+- Attractive wells (red): Pull the snake towards them
+- Repulsive wells (green): Push the snake away from them
+
+Gravity wells add an extra layer of challenge and strategy to the game.
+
 ### Time Manipulation
 
 The game now includes time manipulation abilities:
