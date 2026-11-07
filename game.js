@@ -172,6 +172,44 @@ function activateTimeManipulation(type) {
     };
     energy -= timeManipulationCost;
     updateEnergy();
+    if (type === "reverse") reverseSnake();
+  }
+}
+
+// Turn the snake around once: the tail becomes the head and it heads away
+// from its old body.
+function reverseSnake() {
+  snake.reverse();
+  if (snake.length < 2) {
+    direction = { up: "down", down: "up", left: "right", right: "left" }[direction];
+    return;
+  }
+  const [head, neck] = snake;
+  // A gap wider than one cell means the pair straddles a wrapped edge.
+  let dx = head.x - neck.x;
+  let dy = head.y - neck.y;
+  if (Math.abs(dx) > gridSize) dx = -dx;
+  if (Math.abs(dy) > gridSize) dy = -dy;
+  if (dx > 0) direction = "right";
+  else if (dx < 0) direction = "left";
+  else if (dy > 0) direction = "down";
+  else direction = "up";
+}
+
+let tickMs = 100;
+
+function startLoop() {
+  tickMs = applyTimeManipulation();
+  gameLoop = setInterval(update, tickMs);
+}
+
+// Called once per tick: re-arm the interval when the time effect changes speed.
+function rescheduleLoop() {
+  const ms = applyTimeManipulation();
+  if (ms !== tickMs) {
+    clearInterval(gameLoop);
+    tickMs = ms;
+    gameLoop = setInterval(update, tickMs);
   }
 }
 
@@ -187,9 +225,6 @@ function applyTimeManipulation() {
         return 200;
       case "fast":
         return 50;
-      case "reverse":
-        snake.reverse();
-        return 100;
     }
   }
   return 100;
@@ -226,7 +261,9 @@ function update() {
   updateEnergy();
   if (energy === 0) {
     gameOver();
+    return;
   }
+  rescheduleLoop();
 }
 
 document.addEventListener("keydown", (e) => {
@@ -261,7 +298,7 @@ document.addEventListener("keydown", (e) => {
     case " ":
       if (!gameLoop) {
         initGame();
-        gameLoop = setInterval(update, applyTimeManipulation());
+        startLoop();
       }
       break;
   }
@@ -270,7 +307,7 @@ document.addEventListener("keydown", (e) => {
 startButton.addEventListener("click", () => {
   menu.style.display = "none";
   initGame();
-  gameLoop = setInterval(update, applyTimeManipulation());
+  startLoop();
 });
 
 instructionsButton.addEventListener("click", () => {
